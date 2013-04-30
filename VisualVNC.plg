@@ -1,0 +1,55 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: VisualVNC - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\Users\ADMINI~1\AppData\Local\Temp\RSP4A21.tmp" with contents
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /D "HAVE_REMOTE" /Fp"Debug/VisualVNC.pch" /Yu"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"C:\Users\Administrator\Desktop\VisualVNC-20130401\VisualVNCDoc.cpp"
+]
+Creating command line "cl.exe @C:\Users\ADMINI~1\AppData\Local\Temp\RSP4A21.tmp" 
+Creating temporary file "C:\Users\ADMINI~1\AppData\Local\Temp\RSP4A22.tmp" with contents
+[
+ws2_32.lib iphlpapi.lib setupapi.lib /nologo /subsystem:windows /incremental:yes /pdb:"Debug/VisualVNC.pdb" /debug /machine:I386 /out:"Debug/VisualVNC.exe" /pdbtype:sept 
+".\Debug\ADE.obj"
+".\Debug\Component.obj"
+".\Debug\Hook.obj"
+".\Debug\MainFrm.obj"
+".\Debug\MyMessageBox.obj"
+".\Debug\MyRichEditCtrl.obj"
+".\Debug\NetCfgAPI.obj"
+".\Debug\OutputBar.obj"
+".\Debug\PropertiesViewBar.obj"
+".\Debug\Registry.obj"
+".\Debug\SocketComm.obj"
+".\Debug\SocketManager.obj"
+".\Debug\StdAfx.obj"
+".\Debug\TaskPane.obj"
+".\Debug\VisualVNC.obj"
+".\Debug\VisualVNCDoc.obj"
+".\Debug\VisualVNCView.obj"
+".\Debug\VNDispatcher.obj"
+".\Debug\VNDriverLoader.obj"
+".\Debug\VNDriverLoaderEx.obj"
+".\Debug\VNFilter.obj"
+".\Debug\WorkspaceBar.obj"
+".\Debug\WorkspaceBar2.obj"
+".\Debug\VisualVNC.res"
+]
+Creating command line "link.exe @C:\Users\ADMINI~1\AppData\Local\Temp\RSP4A22.tmp"
+<h3>Output Window</h3>
+Compiling...
+VisualVNCDoc.cpp
+Linking...
+
+
+
+<h3>Results</h3>
+VisualVNC.exe - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

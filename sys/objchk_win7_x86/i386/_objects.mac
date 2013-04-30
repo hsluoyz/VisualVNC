@@ -1,0 +1,21 @@
+
+
+386_OBJECTS=\
+ $(OBJ_PATH)\$O\miniport.obj \
+ $(OBJ_PATH)\$O\passthru.obj \
+ $(OBJ_PATH)\$O\protocol.obj \
+ $(OBJ_PATH)\$O\analysispacket.obj \
+ $(OBJ_PATH)\$O\hook.obj \
+
+
+_RES_FILE=$(OBJ_PATH)\$O\passthru.res
+
+
+
+# lowercased
+BASEDIR=e:\winddk\7600.16385.1
+OBJECT_ROOT=e:\winddk\7600.16385.1
+MAKEDIR_LOWERCASE=f:\visualvnc-20130326\sys
+OBJ_PATH=f:\visualvnc-20130326\sys
+CONCURRENT_MIDL=0
+CONCURRENT_MANIFEST_BUILD=0

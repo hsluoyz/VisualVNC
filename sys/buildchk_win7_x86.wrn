@@ -1,0 +1,64 @@
+warnings in directory f:\visualvnc-20130326\sys
+hook.c and ..\hook.cpp exist
+1>warnings in directory f:\visualvnc-20130326\sys
+1>f:\visualvnc-20130326\sys\passthru.h(23) : warning C4103: 'f:\visualvnc-20130326\sys\passthru.h' : alignment changed after including header, may be due to missing #pragma pack(pop)
+1>f:\visualvnc-20130326\sys\passthru.h(25) : warning C4005: 'NTDDI_VERSION' : macro redefinition
+1>f:\visualvnc-20130326\sys\precomp.h(10) : warning C4103: 'f:\visualvnc-20130326\sys\precomp.h' : alignment changed after including header, may be due to missing #pragma pack(pop)
+1>f:\visualvnc-20130326\sys\miniport.c(23) : warning C4103: 'f:\visualvnc-20130326\sys\miniport.c' : alignment changed after including header, may be due to missing #pragma pack(pop)
+1>f:\visualvnc-20130326\sys\passthru.h(23) : warning C4103: 'f:\visualvnc-20130326\sys\passthru.h' : alignment changed after including header, may be due to missing #pragma pack(pop)
+1>f:\visualvnc-20130326\sys\passthru.h(25) : warning C4005: 'NTDDI_VERSION' : macro redefinition
+1>f:\visualvnc-20130326\sys\precomp.h(10) : warning C4103: 'f:\visualvnc-20130326\sys\precomp.h' : alignment changed after including header, may be due to missing #pragma pack(pop)
+1>f:\visualvnc-20130326\sys\passthru.c(24) : warning C4103: 'f:\visualvnc-20130326\sys\passthru.c' : alignment changed after including header, may be due to missing #pragma pack(pop)
+1>f:\visualvnc-20130326\sys\passthru.c(541) : warning C4047: 'function' : 'ULONG' differs in levels of indirection from 'char [6]'
+1>f:\visualvnc-20130326\sys\passthru.c(541) : warning C4024: 'ExAllocatePoolWithTag' : different types for formal and actual parameter 3
+1>f:\visualvnc-20130326\sys\passthru.c(577) : warning C4047: 'function' : 'ULONG' differs in levels of indirection from 'char [6]'
+1>f:\visualvnc-20130326\sys\passthru.c(577) : warning C4024: 'ExAllocatePoolWithTag' : different types for formal and actual parameter 3
+1>f:\visualvnc-20130326\sys\passthru.c(605) : warning C4047: 'function' : 'ULONG' differs in levels of indirection from 'char [6]'
+1>f:\visualvnc-20130326\sys\passthru.c(605) : warning C4024: 'ExAllocatePoolWithTag' : different types for formal and actual parameter 3
+1>f:\visualvnc-20130326\sys\passthru.c(675) : warning C4133: '=' : incompatible types - from 'PNT_Core_Rule' to 'PCore_Rule'
+1>f:\visualvnc-20130326\sys\passthru.c(682) : warning C4133: '=' : incompatible types - from 'PNT_Mapping_Rule' to 'PMapping_Rule'
+1>f:\visualvnc-20130326\sys\passthru.c(881) : warning C4047: '!=' : 'PLIST_ENTRY' differs in levels of indirection from '_LIST_ENTRY **'
+1>f:\visualvnc-20130326\sys\passthru.c(991) : warning C4047: '=' : 'PNDIS_PACKET' differs in levels of indirection from 'unsigned int'
+1>f:\visualvnc-20130326\sys\passthru.c(1139) : warning C4098: 'freePacketBufferAndMemory' : 'void' function returning a value
+1>f:\visualvnc-20130326\sys\passthru.c(1161) : warning C4098: 'freePacketBufferAndMemory' : 'void' function returning a value
+1>f:\visualvnc-20130326\sys\passthru.c(1192) : warning C4098: 'dprFreePacketBufferAndMemory' : 'void' function returning a value
+1>f:\visualvnc-20130326\sys\passthru.c(1214) : warning C4098: 'dprFreePacketBufferAndMemory' : 'void' function returning a value
+1>f:\visualvnc-20130326\sys\passthru.c(1245) : warning C4098: 'freeBufferAndMemory' : 'void' function returning a value
+1>f:\visualvnc-20130326\sys\passthru.c(1267) : warning C4098: 'freeBufferAndMemory' : 'void' function returning a value
+1>f:\visualvnc-20130326\sys\passthru.c(1321) : warning C4047: '!=' : 'PLIST_ENTRY' differs in levels of indirection from '_LIST_ENTRY **'
+1>f:\visualvnc-20130326\sys\passthru.c(1337) : warning C4047: '!=' : 'PLIST_ENTRY' differs in levels of indirection from '_LIST_ENTRY **'
+1>f:\visualvnc-20130326\sys\passthru.c(1353) : warning C4047: '!=' : 'PLIST_ENTRY' differs in levels of indirection from '_LIST_ENTRY **'
+1>f:\visualvnc-20130326\sys\passthru.c(1369) : warning C4047: '!=' : 'PLIST_ENTRY' differs in levels of indirection from '_LIST_ENTRY **'
+1>f:\visualvnc-20130326\sys\passthru.c(1381) : warning C4047: '!=' : 'PLIST_ENTRY' differs in levels of indirection from '_LIST_ENTRY **'
+1>f:\visualvnc-20130326\sys\passthru.c(1561) : warning C4133: 'function' : incompatible types - from 'PUCHAR' to 'USHORT *'
+1>f:\visualvnc-20130326\sys\passthru.c(1818) : warning C4133: 'function' : incompatible types - from 'PEth_Header' to 'PUCHAR'
+1>f:\visualvnc-20130326\sys\passthru.c(1818) : warning C4133: 'function' : incompatible types - from 'PEth_Header' to 'PUCHAR'
+1>f:\visualvnc-20130326\sys\passthru.c(1820) : warning C4133: 'function' : incompatible types - from 'PEth_Header' to 'PUCHAR'
+1>f:\visualvnc-20130326\sys\passthru.c(1828) : warning C4133: 'function' : incompatible types - from 'PEth_Header' to 'PUCHAR'
+1>f:\visualvnc-20130326\sys\passthru.c(1921) : warning C4133: 'function' : incompatible types - from 'PEth_Header' to 'PUCHAR'
+1>f:\visualvnc-20130326\sys\passthru.c(1921) : warning C4133: 'function' : incompatible types - from 'PEth_Header' to 'PUCHAR'
+1>f:\visualvnc-20130326\sys\passthru.c(1937) : warning C4133: 'function' : incompatible types - from 'PEth_Header' to 'PUCHAR'
+1>f:\visualvnc-20130326\sys\passthru.c(1959) : warning C4133: 'function' : incompatible types - from 'PEth_Header' to 'PUCHAR'
+1>f:\visualvnc-20130326\sys\passthru.c(1980) : warning C4133: 'function' : incompatible types - from 'PEth_Header' to 'PUCHAR'
+1>f:\visualvnc-20130326\sys\passthru.c(2057) : warning C4133: 'function' : incompatible types - from 'PEth_Header' to 'PUCHAR'
+1>f:\visualvnc-20130326\sys\passthru.c(2078) : warning C4133: 'function' : incompatible types - from 'PEth_Header' to 'PUCHAR'
+1>f:\visualvnc-20130326\sys\passthru.c(2078) : warning C4133: 'function' : incompatible types - from 'PEth_Header' to 'PUCHAR'
+1>f:\visualvnc-20130326\sys\passthru.c(2093) : warning C4133: 'function' : incompatible types - from 'PEth_Header' to 'PUCHAR'
+1>f:\visualvnc-20130326\sys\passthru.c(2109) : warning C4133: 'function' : incompatible types - from 'PEth_Header' to 'PUCHAR'
+1>f:\visualvnc-20130326\sys\passthru.c(2118) : warning C4133: 'function' : incompatible types - from 'PEth_Header' to 'PUCHAR'
+1>f:\visualvnc-20130326\sys\passthru.c(2178) : warning C4133: 'function' : incompatible types - from 'PEth_Header' to 'PUCHAR'
+1>f:\visualvnc-20130326\sys\passthru.c(2184) : warning C4133: 'function' : incompatible types - from 'PEth_Header' to 'PUCHAR'
+1>f:\visualvnc-20130326\sys\passthru.h(23) : warning C4103: 'f:\visualvnc-20130326\sys\passthru.h' : alignment changed after including header, may be due to missing #pragma pack(pop)
+1>f:\visualvnc-20130326\sys\passthru.h(25) : warning C4005: 'NTDDI_VERSION' : macro redefinition
+1>f:\visualvnc-20130326\sys\precomp.h(10) : warning C4103: 'f:\visualvnc-20130326\sys\precomp.h' : alignment changed after including header, may be due to missing #pragma pack(pop)
+1>f:\visualvnc-20130326\sys\protocol.c(24) : warning C4103: 'f:\visualvnc-20130326\sys\protocol.c' : alignment changed after including header, may be due to missing #pragma pack(pop)
+1>f:\visualvnc-20130326\sys\protocol.c(895) : warning C4047: '==' : 'PNDIS_PACKET' differs in levels of indirection from 'unsigned int'
+1>f:\visualvnc-20130326\sys\passthru.h(23) : warning C4103: 'f:\visualvnc-20130326\sys\passthru.h' : alignment changed after including header, may be due to missing #pragma pack(pop)
+1>f:\visualvnc-20130326\sys\passthru.h(25) : warning C4005: 'NTDDI_VERSION' : macro redefinition
+1>f:\visualvnc-20130326\sys\precomp.h(10) : warning C4103: 'f:\visualvnc-20130326\sys\precomp.h' : alignment changed after including header, may be due to missing #pragma pack(pop)
+1>f:\visualvnc-20130326\sys\analysispacket.c(1) : warning C4103: 'f:\visualvnc-20130326\sys\analysispacket.c' : alignment changed after including header, may be due to missing #pragma pack(pop)
+1>f:\visualvnc-20130326\sys\passthru.h(23) : warning C4103: 'f:\visualvnc-20130326\sys\passthru.h' : alignment changed after including header, may be due to missing #pragma pack(pop)
+1>f:\visualvnc-20130326\sys\passthru.h(25) : warning C4005: 'NTDDI_VERSION' : macro redefinition
+1>f:\visualvnc-20130326\sys\precomp.h(10) : warning C4103: 'f:\visualvnc-20130326\sys\precomp.h' : alignment changed after including header, may be due to missing #pragma pack(pop)
+1>f:\visualvnc-20130326\sys\hook.c(1) : warning C4103: 'f:\visualvnc-20130326\sys\hook.c' : alignment changed after including header, may be due to missing #pragma pack(pop)
+1>f:\visualvnc-20130326\sys\passthru.c(1795) : warning C4716: 'analyzeBuffer' : must return a value

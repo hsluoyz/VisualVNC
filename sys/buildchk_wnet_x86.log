@@ -1,0 +1,15 @@
+BUILD: c:\users\administrator\desktop\visualvnc-20121204\sys\sources(0): Unknown TARGETPATH value
+BUILD: Examining c:\users\administrator\desktop\visualvnc-20121204\sys directory for files to compile.
+Compiling (NoSync) c:\users\administrator\desktop\visualvnc-20121204\sys directory ********************
+1>'nmake.exe /nologo BUILDMSG=Stop. -i NTTEST= UMTEST= NOLINK=1 PASS1_NOLIB=1 386=1'
+1>BUILDMSG: Processing c:\users\administrator\desktop\visualvnc-20121204\sys
+1>D:\WinDDK\3790.1830\bin\makefile.new(1082) : fatal error U1050: Your .\sources. file must define the TARGETPATH= macro
+1>Stop.
+BUILD: nmake.exe /nologo BUILDMSG=Stop. -i NTTEST= UMTEST= NOLINK=1 PASS1_NOLIB=1 386=1 failed - rc = 2
+Compiling  c:\users\administrator\desktop\visualvnc-20121204\sys directory ********************
+100>'nmake.exe /nologo BUILDMSG=Stop. -i NTTEST= UMTEST= NOLINK=1 386=1'
+100>BUILDMSG: Processing c:\users\administrator\desktop\visualvnc-20121204\sys
+100>D:\WinDDK\3790.1830\bin\makefile.new(1082) : fatal error U1050: Your .\sources. file must define the TARGETPATH= macro
+100>Stop.
+BUILD: nmake.exe failed - rc = 2
+Compile errors: not linking c:\users\administrator\desktop\visualvnc-20121204\sys directory ********************

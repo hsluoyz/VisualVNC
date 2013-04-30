@@ -1,0 +1,285 @@
+	//测试生成
+	//测试发送功能时由192.168.1.234发送即可
+	//测试接收功能时由192.168.1.235发送，192.168.1.234接收。
+
+
+	//////////////////////////////////////测试Margin主机功能//////////////////////////////////////
+	//Margin角色:
+	//Win2003ForDDK
+	//192.168.1.234 （主网卡）
+	//00-0C-29-3F-C4-77
+	//192.168.1.236 （Loopback网卡1）
+	//00-0C-29-3F-C4-81
+	//192.168.1.237 （Loopback网卡2）
+	//00-0C-29-3F-C4-8B
+
+	//与Margin相连的角色:
+	//Win2003ForDDK2
+	//192.168.1.235 （主网卡）
+	//00-0C-29-03-C5-E7
+
+	//Center角色:
+	//Akisn0w-PC
+	//192.168.1.232
+	//78-45-C4-1E-A3-A4
+
+	//PIP = 192.168.1.234
+	//VIP = 192.168.2.128
+	//CIP = 192.168.1.232
+	//EMAC = 00-0C-29-3F-C4-77
+	//CMAC = 78-45-C4-1E-A3-A4
+	//IMAC = N/A
+
+	//(0)
+	//192.168.1.234来触发，Margin主机发送数据包，数据包无限制条件
+	//此数据包应该进行以下VEP封装后发送：
+	//目的MAC: 78-45-C4-1E-A3-A4 (CMAC)
+	//源MAC: 00-0C-29-3F-C4-77 (EMAC)
+	//目的IP: 192.168.1.232 (CIP)
+	//源IP: 192.168.1.234 (PIP)
+	pDebugRule = new VNDebugRule();
+	pDebugRule->eType = TYPE_IP;
+	pDebugRule->iType = TYPE_NONE;
+	pDebugRule->eDstMAC = _T("00-0C-29-03-C5-E7");
+	pDebugRule->eSrcMAC = _T("00-0C-29-3F-C4-77");
+	pDebugRule->eDstIP = _T("192.168.1.235");
+	pDebugRule->eSrcIP = _T("192.168.1.234");
+	m_pArrDebugRules.push_back(pDebugRule);
+
+	//(1)
+	//192.168.1.235来触发，Margin主机接收数据包，A情况：ARP Request报文
+	//仅可能是ARP请求，因为Margin是不会主动进行ARP请求的，所以也不会收到ARP应答
+	//此数据包应该由驱动直接进行应答，然后原数据包丢弃
+	pDebugRule = new VNDebugRule();
+	pDebugRule->eType = TYPE_ARP_REQUEST;
+	pDebugRule->iType = TYPE_NONE;
+	//pDebugRule->eDstMAC = _T("12-34-56-78-9A-BC");
+	pDebugRule->eSrcMAC = _T("00-0C-29-03-C5-E7");
+	pDebugRule->eDstIP = _T("192.168.1.234");
+	pDebugRule->eSrcIP = _T("192.168.1.235");
+	m_pArrDebugRules.push_back(pDebugRule);
+
+	//(2)
+	//192.168.1.235来触发，Margin主机接收数据包，B情况：VEP报文，且目的IP为192.168.1.234 (PIP)，内部为IP报文
+	//此数据包应该解封装后，修改目的MAC为EMAC，接收数据包
+	pDebugRule = new VNDebugRule();
+	pDebugRule->eType = TYPE_IP;
+	pDebugRule->iType = TYPE_IP;
+	pDebugRule->eDstMAC = _T("00-0C-29-3F-C4-77");
+	pDebugRule->eSrcMAC = _T("00-0C-29-03-C5-E7");
+	pDebugRule->eDstIP = _T("192.168.1.234");
+	pDebugRule->eSrcIP = _T("192.168.1.235");
+	pDebugRule->iDstMAC = _T("12-34-56-78-9A-BC"); //此处被修改为00-0C-29-3F-C4-77 (EMAC)
+	pDebugRule->iSrcMAC = _T("78-9A-BC-DE-F0-12");
+	pDebugRule->iDstIP = _T("192.168.2.128");
+	pDebugRule->iSrcIP = _T("4.4.4.4");
+	m_pArrDebugRules.push_back(pDebugRule);
+
+	//(3)
+	//192.168.1.235来触发，Margin主机接收数据包，B情况：VEP报文，且目的IP为192.168.1.234 (PIP)，内部为ARP Request报文
+	//此数据包应该解封装后，接收数据包
+	pDebugRule = new VNDebugRule();
+	pDebugRule->eType = TYPE_IP;
+	pDebugRule->iType = TYPE_ARP_REQUEST;
+	pDebugRule->eDstMAC = _T("00-0C-29-3F-C4-77");
+	pDebugRule->eSrcMAC = _T("00-0C-29-03-C5-E7");
+	pDebugRule->eDstIP = _T("192.168.1.234");
+	pDebugRule->eSrcIP = _T("192.168.1.235");
+	//pDebugRule->iDstMAC = _T("12-34-56-78-9A-BC");
+	pDebugRule->iSrcMAC = _T("78-9A-BC-DE-F0-12");
+	pDebugRule->iDstIP = _T("192.168.2.128");
+	pDebugRule->iSrcIP = _T("4.4.4.4");
+	m_pArrDebugRules.push_back(pDebugRule);
+
+	//(4)
+	//192.168.1.235来触发，Margin主机接收数据包，B情况：VEP报文，且目的IP为192.168.1.234 (PIP)，内部为ARP Reply报文
+	//此数据包应该解封装后，修改两处目的MAC为EMAC，接收数据包
+	pDebugRule = new VNDebugRule();
+	pDebugRule->eType = TYPE_IP;
+	pDebugRule->iType = TYPE_ARP_REPLY;
+	pDebugRule->eDstMAC = _T("00-0C-29-3F-C4-77");
+	pDebugRule->eSrcMAC = _T("00-0C-29-03-C5-E7");
+	pDebugRule->eDstIP = _T("192.168.1.234");
+	pDebugRule->eSrcIP = _T("192.168.1.235");
+	pDebugRule->iDstMAC = _T("12-34-56-78-9A-BC"); //此处（实际上是两处）被修改为00-0C-29-3F-C4-77 (EMAC)
+	pDebugRule->iSrcMAC = _T("78-9A-BC-DE-F0-12");
+	pDebugRule->iDstIP = _T("192.168.2.128");
+	pDebugRule->iSrcIP = _T("4.4.4.4");
+	m_pArrDebugRules.push_back(pDebugRule);
+
+	//(5)
+	//192.168.1.235来触发，Margin主机接收数据包，B情况：VEP报文，且目的IP不为192.168.1.234 (PIP)
+	//一般收不到这种包，但是可以用Loopback实现
+	//此数据包应该丢弃
+	pDebugRule = new VNDebugRule();
+	pDebugRule->eType = TYPE_IP;
+	pDebugRule->iType = TYPE_IP;
+	pDebugRule->eDstMAC = _T("00-0C-29-3F-C4-81");
+	pDebugRule->eSrcMAC = _T("00-0C-29-03-C5-E7");
+	pDebugRule->eDstIP = _T("192.168.1.236"); //假设不是发给Margin主机的包，只是随便地通过Margin主机的Loopback网卡收到而已
+	pDebugRule->eSrcIP = _T("192.168.1.235");
+	pDebugRule->iDstMAC = _T("12-34-56-78-9A-BC");
+	pDebugRule->iSrcMAC = _T("78-9A-BC-DE-F0-12");
+	pDebugRule->iDstIP = _T("192.168.2.128");
+	pDebugRule->iSrcIP = _T("4.4.4.4");
+	m_pArrDebugRules.push_back(pDebugRule);
+
+	//(6)
+	//192.168.1.235来触发，Margin主机接收数据包，C情况：普通的IP报文
+	//此数据包应该丢弃
+	pDebugRule = new VNDebugRule();
+	pDebugRule->eType = TYPE_IP;
+	pDebugRule->iType = TYPE_NONE;
+	pDebugRule->eDstMAC = _T("00-0C-29-3F-C4-77");
+	pDebugRule->eSrcMAC = _T("00-0C-29-03-C5-E7");
+	pDebugRule->eDstIP = _T("192.168.1.234");
+	pDebugRule->eSrcIP = _T("192.168.1.235");
+	m_pArrDebugRules.push_back(pDebugRule);
+
+	//////////////////////////////////////测试Center主机功能//////////////////////////////////////
+	//Center角色:
+	//Win2003ForDDK
+	//192.168.1.234 （主网卡）
+	//00-0C-29-3F-C4-77
+	//192.168.1.236 （Loopback网卡1）
+	//00-0C-29-3F-C4-81
+	//192.168.1.237 （Loopback网卡2）
+	//00-0C-29-3F-C4-8B
+	
+	//Margin角色:
+	//Win2003ForDDK2
+	//192.168.1.235 （主网卡）
+	//00-0C-29-03-C5-E7
+
+	//没角色:
+	//Akisn0w-PC
+	//192.168.1.232
+	//78-45-C4-1E-A3-A4
+	
+	//PIP = 192.168.1.235
+	//VIP = 192.168.1.236
+	//CIP = 192.168.1.234
+	//EMAC = 00-0C-29-03-C5-E7
+	//CMAC = 00-0C-29-3F-C4-77
+	//IMAC = 00-0C-29-3F-C4-81
+
+	//(7)
+	//192.168.1.234来触发，Center主机发送数据包，数据包无限制条件
+	//此数据包应该允许通过
+	pDebugRule = new VNDebugRule();
+	pDebugRule->eType = TYPE_IP;
+	pDebugRule->iType = TYPE_NONE;
+	pDebugRule->eDstMAC = _T("78-45-C4-1E-A3-A4");
+	pDebugRule->eSrcMAC = _T("00-0C-29-3F-C4-77");
+	pDebugRule->eDstIP = _T("192.168.1.232");
+	pDebugRule->eSrcIP = _T("192.168.1.234");
+	m_pArrDebugRules.push_back(pDebugRule);
+
+	//(8)
+	//192.168.1.235来触发，Center主机接收数据包，A情况：接收网卡为00-0C-29-3F-C4-81 (IMAC)网卡
+	//此数据包应该进行以下VEP封装后发送：
+	//目的MAC: 00-0C-29-03-C5-E7 (EMAC)
+	//源MAC: 00-0C-29-3F-C4-77 (CMAC)
+	//目的IP: 192.168.1.235 (PIP)
+	//源IP: 192.168.1.234 (CIP)
+	pDebugRule = new VNDebugRule();
+	pDebugRule->eType = TYPE_IP;
+	pDebugRule->iType = TYPE_NONE;
+	pDebugRule->eDstMAC = _T("00-0C-29-3F-C4-81"); //IMAC
+	pDebugRule->eSrcMAC = _T("00-0C-29-03-C5-E7");
+	pDebugRule->eDstIP = _T("192.168.1.236"); //发给接收网卡就是发给对应IP
+	pDebugRule->eSrcIP = _T("192.168.1.235"); //按说不应该由Margin主机发这个包，不过测试就无所谓了
+	m_pArrDebugRules.push_back(pDebugRule);
+
+	//(9)
+	//192.168.1.235来触发，Center主机接收数据包，B情况：接收网卡为00-0C-29-3F-C4-77 (CMAC)网卡，且IP报文，为VEP封装，
+	//外层源IP对应到某一PIP，如192.168.1.235，解封装后，内部为IP报文
+	//此数据包应该修改源MAC为00-0C-29-3F-C4-81 (IMAC)，从对应的IMAC网卡转发数据包
+	pDebugRule = new VNDebugRule();
+	pDebugRule->eType = TYPE_IP;
+	pDebugRule->iType = TYPE_IP;
+	pDebugRule->eDstMAC = _T("00-0C-29-3F-C4-77");
+	pDebugRule->eSrcMAC = _T("00-0C-29-03-C5-E7");
+	pDebugRule->eDstIP = _T("192.168.1.234");
+	pDebugRule->eSrcIP = _T("192.168.1.235");
+	pDebugRule->iDstMAC = _T("56-78-9A-BC-DE-F0");
+	pDebugRule->iSrcMAC = _T("78-9A-BC-DE-F0-12"); //此处被修改为00-0C-29-3F-C4-81 (IMAC)
+	pDebugRule->iDstIP = _T("3.3.3.3");
+	pDebugRule->iSrcIP = _T("4.4.4.4");
+	m_pArrDebugRules.push_back(pDebugRule);
+
+	//(10)
+	//192.168.1.235来触发，Center主机接收数据包，B情况：接收网卡为00-0C-29-3F-C4-77 (CMAC)网卡，且IP报文，为VEP封装，
+	//外层源IP对应到某一PIP，如192.168.1.235，解封装后，内部为ARP Request报文
+	//此数据包应该修改两处源MAC为00-0C-29-3F-C4-81 (IMAC)，从对应的IMAC网卡转发数据包
+	pDebugRule = new VNDebugRule();
+	pDebugRule->eType = TYPE_IP;
+	pDebugRule->iType = TYPE_ARP_REQUEST;
+	pDebugRule->eDstMAC = _T("00-0C-29-3F-C4-77");
+	pDebugRule->eSrcMAC = _T("00-0C-29-03-C5-E7");
+	pDebugRule->eDstIP = _T("192.168.1.234");
+	pDebugRule->eSrcIP = _T("192.168.1.235");
+	//pDebugRule->iDstMAC = _T("56-78-9A-BC-DE-F0");
+	pDebugRule->iSrcMAC = _T("78-9A-BC-DE-F0-12"); //此处（实际上是两处）被修改为00-0C-29-3F-C4-81 (IMAC)
+	pDebugRule->iDstIP = _T("3.3.3.3");
+	pDebugRule->iSrcIP = _T("4.4.4.4");
+	m_pArrDebugRules.push_back(pDebugRule);
+
+	//(11)
+	//192.168.1.235来触发，Center主机接收数据包，B情况：接收网卡为00-0C-29-3F-C4-77 (CMAC)网卡，且IP报文，为VEP封装，
+	//外层源IP对应到某一PIP，如192.168.1.235，解封装后，内部为ARP Reply报文
+	//此数据包应该修改两处源MAC为00-0C-29-3F-C4-81 (IMAC)，从对应的IMAC网卡转发数据包
+	pDebugRule = new VNDebugRule();
+	pDebugRule->eType = TYPE_IP;
+	pDebugRule->iType = TYPE_ARP_REPLY;
+	pDebugRule->eDstMAC = _T("00-0C-29-3F-C4-77");
+	pDebugRule->eSrcMAC = _T("00-0C-29-03-C5-E7");
+	pDebugRule->eDstIP = _T("192.168.1.234");
+	pDebugRule->eSrcIP = _T("192.168.1.235");
+	pDebugRule->iDstMAC = _T("56-78-9A-BC-DE-F0");
+	pDebugRule->iSrcMAC = _T("78-9A-BC-DE-F0-12"); //此处（实际上是两处）被修改为00-0C-29-3F-C4-81 (IMAC)
+	pDebugRule->iDstIP = _T("3.3.3.3");
+	pDebugRule->iSrcIP = _T("4.4.4.4");
+	m_pArrDebugRules.push_back(pDebugRule);
+
+	//(12)
+	//192.168.1.235来触发，Center主机接收数据包，B情况：接收网卡为00-0C-29-3F-C4-77 (CMAC)网卡，且IP报文，为VEP封装，
+	//外层源IP不对应对应到任何PIP，如192.168.1.235
+	//此数据包应该丢弃
+	pDebugRule = new VNDebugRule();
+	pDebugRule->eType = TYPE_IP;
+	pDebugRule->iType = TYPE_IP;
+	pDebugRule->eDstMAC = _T("00-0C-29-3F-C4-77");
+	pDebugRule->eSrcMAC = _T("00-0C-29-03-C5-E7");
+	pDebugRule->eDstIP = _T("192.168.1.234");
+	pDebugRule->eSrcIP = _T("192.168.1.238"); //不对应192.168.1.235 (PIP)
+	pDebugRule->iDstMAC = _T("56-78-9A-BC-DE-F0");
+	pDebugRule->iSrcMAC = _T("78-9A-BC-DE-F0-12");
+	pDebugRule->iDstIP = _T("3.3.3.3");
+	pDebugRule->iSrcIP = _T("4.4.4.4");
+	m_pArrDebugRules.push_back(pDebugRule);
+
+	//(13)
+	//192.168.1.235来触发，Center主机接收数据包，B情况：接收网卡为00-0C-29-3F-C4-77 (CMAC)网卡，且IP报文，但不是VEP封装
+	//此数据包应该允许通过
+	pDebugRule = new VNDebugRule();
+	pDebugRule->eType = TYPE_IP;
+	pDebugRule->iType = TYPE_NONE;
+	pDebugRule->eDstMAC = _T("00-0C-29-3F-C4-77");
+	pDebugRule->eSrcMAC = _T("00-0C-29-03-C5-E7");
+	pDebugRule->eDstIP = _T("192.168.1.234");
+	pDebugRule->eSrcIP = _T("192.168.1.235");
+	m_pArrDebugRules.push_back(pDebugRule);
+
+	//(14)
+	//192.168.1.235来触发，Center主机接收数据包，C情况：接收网卡为00-0C-29-3F-C4-8B，既不属于00-0C-29-3F-C4-81 (IMAC)网卡，
+	//也不属于00-0C-29-3F-C4-77 (CMAC)网卡
+	//此数据包应该允许通过
+	pDebugRule = new VNDebugRule();
+	pDebugRule->eType = TYPE_IP;
+	pDebugRule->iType = TYPE_NONE;
+	pDebugRule->eDstMAC = _T("00-0C-29-3F-C4-8B");
+	pDebugRule->eSrcMAC = _T("00-0C-29-03-C5-E7"); //写个EMAC无所谓
+	pDebugRule->eDstIP = _T("192.168.1.237"); //Lookback2
+	pDebugRule->eSrcIP = _T("192.168.1.235");
+	m_pArrDebugRules.push_back(pDebugRule);

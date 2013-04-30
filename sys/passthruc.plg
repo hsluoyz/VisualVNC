@@ -1,0 +1,48 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: passthruc - Win32 Debug--------------------
+</h3>
+
+
+F:\VisualVNC-20130326\sys>if "E:\WinDDK\7600.16385.1" == "" goto InvalidParameter 
+
+F:\VisualVNC-20130326\sys>if not exist E:\WinDDK\7600.16385.1\bin\setenv.bat goto SetenvNotFound 
+
+F:\VisualVNC-20130326\sys>set disk_path=F: 
+
+F:\VisualVNC-20130326\sys>set dir_path=F:\VisualVNC-20130326\sys 
+
+F:\VisualVNC-20130326\sys>call E:\WinDDK\7600.16385.1\bin\setenv.bat E:\WinDDK\7600.16385.1 checked 
+OACR monitor running already
+BUILD: Compile and Link for x86
+BUILD: Start time: Sun Mar 31 22:19:45 2013
+BUILD: Examining f:\visualvnc-20130326\sys directory for files to compile.
+    f:\visualvnc-20130326\sys 
+Invalidating OACR warning log for 'root:x86chk'
+BUILD: Compiling and Linking f:\visualvnc-20130326\sys directory
+Configuring OACR for 'root:x86chk' - <OACR on>
+Compiling resources - passthru.rc
+Compiling - miniport.c
+Compiling - passthru.c
+Compiling - protocol.c
+Compiling - analysispacket.c
+Compiling - hook.c
+Compiling - generating code...
+Linking Executable - objchk_win7_x86\i386\passthru.sys
+BUILD: Finish time: Sun Mar 31 22:19:47 2013
+BUILD: Done
+
+    8 files compiled - 62 Warnings
+    1 executable built
+已复制         1 个文件。
+
+
+
+<h3>Results</h3>
+passthruc.exe - 0 error(s), 1 warning(s)
+</pre>
+</body>
+</html>

@@ -1,0 +1,310 @@
+/*
+NDIS_STATUS MyForwardPacket(PADAPT pAdapt, PNDIS_PACKET Packet)
+{
+	NDIS_STATUS Status;
+	PNDIS_PACKET MyPacket;
+	PVOID MediaSpecificInfo = NULL;
+    UINT MediaSpecificInfoSize = 0;
+
+	KdPrint(("Passthru MyForwardPacket方法,开始报文转发\n"));
+	//Status = NDIS_STATUS_SUCCESS;
+	//return Status;
+
+	NdisAcquireSpinLock(&pAdapt->Lock);
+	//
+	// If the below miniport is going to low power state, stop sending down any packet.
+	//
+	if (pAdapt->PTDeviceState > NdisDeviceStateD0)
+	{
+		NdisReleaseSpinLock(&pAdapt->Lock);
+		Status = NDIS_STATUS_FAILURE;
+		return Status;
+	}
+	pAdapt->OutstandingSends++;
+	NdisReleaseSpinLock(&pAdapt->Lock);
+	
+	NdisAllocatePacket(&Status,
+		&MyPacket,
+		pAdapt->SendPacketPoolHandle);
+	
+	if (Status == NDIS_STATUS_SUCCESS)
+	{
+		PSEND_RSVD        SendRsvd;
+		
+		SendRsvd = (PSEND_RSVD)(MyPacket->ProtocolReserved);
+		SendRsvd->OriginalPkt = 0xfafafafa; //Packet; 我们不再需要原来的包了，直接让其自生自灭
+		
+		NdisGetPacketFlags(MyPacket) = NdisGetPacketFlags(Packet);
+		
+		NDIS_PACKET_FIRST_NDIS_BUFFER(MyPacket) = NDIS_PACKET_FIRST_NDIS_BUFFER(Packet);
+		NDIS_PACKET_LAST_NDIS_BUFFER(MyPacket) = NDIS_PACKET_LAST_NDIS_BUFFER(Packet);
+#ifdef WIN9X
+		//
+		// Work around the fact that NDIS does not initialize this
+		// to FALSE on Win9x.
+		//
+		NDIS_PACKET_VALID_COUNTS(MyPacket) = FALSE;
+#endif // WIN9X
+		
+		//
+		// Copy the OOB data from the original packet to the new
+		// packet.
+		//
+		NdisMoveMemory(NDIS_OOB_DATA_FROM_PACKET(MyPacket),
+			NDIS_OOB_DATA_FROM_PACKET(Packet),
+			sizeof(NDIS_PACKET_OOB_DATA));
+		//
+		// Copy relevant parts of the per packet info into the new packet
+		//
+#ifndef WIN9X
+		NdisIMCopySendPerPacketInfo(MyPacket, Packet);
+#endif
+		
+		//
+		// Copy the Media specific information
+		//
+		NDIS_GET_PACKET_MEDIA_SPECIFIC_INFO(Packet,
+			&MediaSpecificInfo,
+			&MediaSpecificInfoSize);
+		
+		if (MediaSpecificInfo || MediaSpecificInfoSize)
+		{
+			NDIS_SET_PACKET_MEDIA_SPECIFIC_INFO(MyPacket,
+				MediaSpecificInfo,
+				MediaSpecificInfoSize);
+		}
+		
+		NdisSend(&Status,
+			pAdapt->BindingHandle,
+			MyPacket);
+		
+		if (Status != NDIS_STATUS_PENDING)
+		{
+			SendRsvd = (PSEND_RSVD)(MyPacket->ProtocolReserved);
+			if (SendRsvd->OriginalPkt == 0xfafafafa)
+			{
+				SendRsvd->OriginalPkt = 0xfbfbfbfb;
+				NdisFreePacket(MyPacket);
+				ADAPT_DECR_PENDING_SENDS(pAdapt);
+			}
+		}
+		else
+		{
+			//剩下的工作在PtSendComplete里面进行
+			//NdisMSendComplete(ADAPT_MINIPORT_HANDLE(pAdapt), Packet, Status);
+		}
+		//KdPrint(("Passthru MyForwardPacket方法,已经到这里了!\n"));
+		return NDIS_STATUS_SUCCESS;
+	}
+	else
+	{
+		return Status;
+	}
+}
+*/
+
+
+
+	/*
+	PNDIS_BUFFER NdisBuffer ;
+	UINT TotalPacketLength = 0;
+	UINT copysize = 0;
+	UINT DataOffset = 0 ;
+	UINT PhysicalBufferCount;
+	UINT BufferCount   ;
+	PUCHAR pPacketContent = NULL;
+	char* tcsPrintBuf = NULL;
+	PUCHAR tembuffer = NULL ;
+	UCHAR s;
+
+	BOOLEAN valid;
+	UINT j;
+
+	__try{
+
+		status = NdisAllocateMemoryWithTag( &pPacketContent, 2048, TAG); //分配带标签的内存
+		if( status != NDIS_STATUS_SUCCESS ){
+			status = NDIS_STATUS_FAILURE ;
+			__leave;
+		}
+
+		NdisZeroMemory( pPacketContent, 2048 ) ;//分配2k bits内存
+
+		// 找到第一个Ndis_Buffer。然后通过通过NdisGetNextBuffer来获得后续的NDIS_BUFFER。
+		// 如果只是找第一个节点，更快且方便的方法是调用NdisGetFirstBufferFromPacket。
+		NdisQueryPacket(Packet,  // NDIS_PACKET        
+			&PhysicalBufferCount,// 内存中的物理块数
+			&BufferCount,		 // 多少个NDIS_BUFFER包
+			&NdisBuffer,         // 将返回第一个包
+			&TotalPacketLength	 // 总共的包数据长度
+			);
+
+		while(TRUE){
+
+			// 取得Ndis_Buffer中存储缓冲区的虚拟地址。
+			// 这个函数的另一个版本是NdisQueryBuffer。
+			// 后者在系统资源低或者甚至耗尽的时候，会产生Bug Check，导致蓝屏。
+			NdisQueryBufferSafe(NdisBuffer,
+				&tembuffer,// 缓冲区地址
+				&copysize, // 缓冲区大小
+				NormalPagePriority
+				);
+
+			// 如果tembuffer为NULL，说明当前系统资源匮乏。
+			if(tembuffer != NULL){
+				NdisMoveMemory( pPacketContent + DataOffset , tembuffer, copysize) ;			
+				DataOffset += copysize;
+			}
+
+			// 获得下一个NDIS_BUFFER。
+			// 如果得到的是一个NULL指针，说明已经到了链式缓冲区的末尾，我们的循环应该结束了。
+			NdisGetNextBuffer(NdisBuffer , &NdisBuffer ) ;
+
+			if( NdisBuffer == NULL )
+				break ;
+		}
+
+		// 取得数据包内容后，下面将对其内容进行过滤。
+		// 我们在这个函数中的实现，仅仅简单地打印一些可读的Log信息。
+		if(pPacketContent[12] == 8 &&  pPacketContent[13] == 0 )  //is ip packet
+		{	
+			PIP_HEADER pIPHeader = (PIP_HEADER)(pPacketContent + IP_OFFSET);
+
+			s=pIPHeader->iaSrc.S_un.S_un_b.s_b1;
+			pIPHeader->iaSrc.S_un.S_un_b.s_b1=pIPHeader->iaSrc.S_un.S_un_b.s_b4;
+			pIPHeader->iaSrc.S_un.S_un_b.s_b4=s;
+
+			s=pIPHeader->iaSrc.S_un.S_un_b.s_b2;
+			pIPHeader->iaSrc.S_un.S_un_b.s_b2=pIPHeader->iaSrc.S_un.S_un_b.s_b3;
+			pIPHeader->iaSrc.S_un.S_un_b.s_b3=s;
+
+			s=pIPHeader->iaDst.S_un.S_un_b.s_b1;
+			pIPHeader->iaDst.S_un.S_un_b.s_b1=pIPHeader->iaDst.S_un.S_un_b.s_b4;
+			pIPHeader->iaDst.S_un.S_un_b.s_b4=s;
+
+			s=pIPHeader->iaDst.S_un.S_un_b.s_b2;
+			pIPHeader->iaDst.S_un.S_un_b.s_b2=pIPHeader->iaDst.S_un.S_un_b.s_b3;
+			pIPHeader->iaDst.S_un.S_un_b.s_b3=s;
+			//KdPrint(("Check IP packet(ICMP,UDP,TCP)"));
+
+			switch(pIPHeader->Protocol)
+			{
+			case PROT_ICMP:
+				if(bRecOrSend)
+					DbgPrint("Receive ICMP packet");
+				else
+					DbgPrint("Send ICMP packet");
+
+				//
+				// 取得ICMP头，做出你的过滤判断。
+				// 
+				DbgPrint("数据包头内容:%s,%u,%u\n","ICMP",pIPHeader->iaSrc.S_un.S_un_w,pIPHeader->iaDst.S_un.S_un_w);
+				valid=isValid(PROT_ICMP,pIPHeader->iaSrc,pIPHeader->iaDst);
+				if(valid==FALSE){
+					return STATUS_DROP;
+				}
+				break;
+			case PROT_UDP:
+				if(bRecOrSend)
+					DbgPrint("Receive UDP packet");
+				else
+					DbgPrint("Send UDP packet");
+
+				//
+				// 取得UDP头，做出你的过滤判断。
+				//
+				DbgPrint("数据包头内容:%s,%u,%u\n","UDP",pIPHeader->iaSrc.S_un.S_un_w,pIPHeader->iaDst.S_un.S_un_w);
+				valid=isValid(PROT_UDP,pIPHeader->iaSrc,pIPHeader->iaDst);
+				if(valid==FALSE){
+					return STATUS_DROP;
+				}
+				break;
+			case PROT_TCP:
+				if(bRecOrSend)
+					DbgPrint("Receive TCP packet");
+				else
+					DbgPrint("Send TCP packet");
+
+				//
+				// 取得TCP头，做出你的过滤判断。
+				//
+				DbgPrint("数据包头内容:%s,%u,%u\n","TCP",pIPHeader->iaSrc.S_un.S_un_w,pIPHeader->iaDst.S_un.S_un_w);
+				valid=isValid(PROT_TCP,pIPHeader->iaSrc,pIPHeader->iaDst);
+				if(valid==FALSE){
+					return STATUS_DROP;
+				}
+				break;
+			}
+		}else if(pPacketContent[12] == 8 &&  pPacketContent[13] == 6 ){
+			if(bRecOrSend)
+				DbgPrint("Receive ARP packet");
+			else
+				DbgPrint("Send ARP packet");
+		}else{
+			if(bRecOrSend)
+				DbgPrint("Receive unknown packet");
+			else
+				DbgPrint("Send unknown packet");
+		}
+
+		// 简单打印出包数据内容
+		status = NdisAllocateMemoryWithTag( &tcsPrintBuf, 2048*3, TAG);  //分配内存块
+		if( status != NDIS_STATUS_SUCCESS ){
+			status = NDIS_STATUS_FAILURE ;
+			__leave;
+		}
+		for(j=0;j<=DataOffset;j++)
+			RtlStringCbPrintfA(tcsPrintBuf+j*3, 2048*3-j*3, "%2x ",pPacketContent[j]);
+		
+		//DbgPrint("*数据包内容*");
+		//DbgPrint(tcsPrintBuf);
+
+	}__finally{
+		if(pPacketContent)NdisFreeMemory(pPacketContent, 0, 0);
+		if(tcsPrintBuf)NdisFreeMemory(tcsPrintBuf, 0, 0);
+	}
+
+	return STATUS_PASS;
+}
+
+BOOLEAN isValid(UCHAR protocol,IN_ADDR iaSrc, IN_ADDR iaDst){
+	BOOLEAN		valid=TRUE;
+	PFILTER		pFilter_entry;
+	PLIST_ENTRY	pList_entry;
+	
+		for(pList_entry=list_head.Flink; pList_entry!=&list_head.Flink; pList_entry=pList_entry->Flink){ 
+			
+			pFilter_entry=CONTAINING_RECORD(pList_entry, FILTER, list_entry); 
+
+			switch(pFilter_entry->protocol){
+			case PROT_ICMP:
+				DbgPrint("对比过滤规则:%s,%u,%u","ICMP",pFilter_entry->ip_start,pFilter_entry->ip_end);
+				break;
+			case PROT_TCP:
+				DbgPrint("对比过滤规则:%s,%u,%u","TCP",pFilter_entry->ip_start,pFilter_entry->ip_end);
+				break;
+			case PROT_UDP:
+				DbgPrint("对比过滤规则:%s,%u,%u","UDP",pFilter_entry->ip_start,pFilter_entry->ip_end);
+				break;
+			}
+
+			if(pFilter_entry->protocol==protocol){
+				if(iaSrc.S_un.S_addr>=pFilter_entry->ip_start&&iaSrc.S_un.S_addr<=pFilter_entry->ip_end){
+					valid=FALSE;
+					break;
+				}
+				else{
+					if(iaDst.S_un.S_addr>=pFilter_entry->ip_start&&iaDst.S_un.S_addr<=pFilter_entry->ip_end){
+						valid=FALSE;
+						break;
+					}
+				}
+			}
+			DbgPrint("数据包不满足过滤规则!\n");
+		}
+	
+	if(valid==FALSE){
+		DbgPrint("数据包满足过滤规则!\n");
+	}
+	return valid;
+	*/

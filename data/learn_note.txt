@@ -1,0 +1,124 @@
+策略中全部内容：
+Core Rule
+CIP CMAC
+	Mapping Rule
+	VIP PIP IMAC EMAC
+
+策略中实际需要的内容：
+Core Rule
+CIP
+	Mapping Rule
+	VIP(包括mask和gate) PIP IMAC
+	
+
+
+Center主机需要知道：1）CIP	2）VIP PIP IMAC
+CMAC = getTargetMacOrGateMac(CIP)
+EMAC = getTargetMacOrGateMac(PIP) //可能只是网关
+其中CMAC和IMAC需要调用getAdapterByMAC获取其pAdapt
+
+Margin主机需要知道：1）CIP	2）VIP PIP
+EMAC = getTargetMacOrGateMac(PIP)
+CMAC = getTargetMacOrGateMac(CIP) //可能只是网关
+IMAC貌似没用
+
+
+
+
+一、Center主机的虚拟网络策略
+1.************************发送数据包时：************************
+A.发送网卡MAC地址属于IMAC：
+把数据包丢弃。
+B.发送网卡MAC地址属于CMAC或其它：
+让所有数据包通过。
+
+2.************************收到数据包时：************************
+A.接收网卡MAC地址属于IMAC（从虚拟网络向物理网络转发的数据包）：
+	a.源MAC为自身IMAC地址，丢弃此数据包。
+	b.进行VEP协议封装：
+		源IP：CIP；
+		源MAC：CMAC；
+		目的IP：PIP；
+		目的MAC：getTargetMacOrGateMac(PIP)，存放在EMAC处。
+	c.计算IP报文长度，填入后，再计算IP报头校验和，填入后从CMAC网卡转发数据包。
+B.接收网卡MAC地址属于CMAC（从物理网络向虚拟网络转发的数据包）：
+	a.若是IP报文，且IP协议字段为0x20，则为VEP协议封装，判断源IP为哪个PIP：
+		1）若源IP对应到某一PIP，解封装后，需要判断内部是IP报文还是ARP报文：
+			①是IP报文，则修改源MAC为IMAC，从对应的IMAC网卡转发数据包；
+			②是ARP请求报文，则修改两处源MAC为IMAC，从对应的IMAC网卡转发数据包；
+			③是ARP应答报文，则修改两处源MAC为IMAC，从对应的IMAC网卡转发数据包；
+			④是其它类型报文，则丢弃。
+		2）若源IP不对应某一PIP，则丢弃。
+	b.不是VEP协议，则让所有数据包通过。
+C.接收网卡MAC地址既不属于IMAC也不属于CMAC，则让所有数据包通过。
+
+
+二、Margin主机的虚拟路由策略
+
+1.************************发送数据包时：************************
+A.进行VEP协议封装：
+	源IP：PIP；
+	源MAC：EMAC；
+	目的IP：CIP；
+	目的MAC：getTargetMacOrGateMac(CIP)，存放在CMAC处。
+B.计算IP报文长度，填入后，再计算IP报头校验和，填入后发送。
+
+2.************************收到数据包时：************************
+A.若是ARP报文，若目的IP为PIP，则必须由驱动程序直接进行ARP应答，并丢弃原数据包；若目的IP不为PIP，直接丢弃数据包。
+B.若不是ARP报文，但是是IP报文，且IP协议字段为0x20，则为VEP协议封装，判断目的IP是否为PIP：
+	a.目的IP为PIP，解封装后，再判断内部是IP报文还是ARP报文：
+		①是IP报文，则修改目的MAC为EMAC，接收数据包；
+		②是ARP请求报文，则接收数据包；
+		③是ARP应答报文，则修改两处目的MAC为EMAC，接收数据包；
+		④是其它类型报文，则丢弃。
+	b.目的IP不为PIP，则丢弃。
+C.若不是ARP报文，也不是VEP报文，则丢弃。
+
+
+功能测试
+Margin主机发送数据包：随便填
+eType
+iType
+eDstMAC
+eSrcMAC
+eDstIP
+eSrcIP
+iDstMAC
+iSrcMAC
+iDstIP
+iSrcIP
+
+
+
+备注：其实不用“查看目的IP是否为VIP”这步，不然Margin主机无法进入混杂模式
+
+
+Ethernet帧头填写方式
+[6] 目的MAC**********************
+[6] 源MAC**********************
+[2] 类型: 0x0800(IP)
+
+IP报头填写方式
+[0.5] Version: 0x4
+[0.5] Header length: 0x5(5x4=20Bytes)
+[1] Differentiated services Field: 0x0
+[2] Total Length: 包括IP报头在内的IP报文总字节数，自己算******************************************************************************
+[2] Identification: 0x0, 组装包的时候用的ID，只要不让它分片，就随便填就好了
+[1] Flags: 0x0
+[1] Fragment offset: 0x0
+[1] Time to live: 0x80
+[1] Protocol: 0x20(1-ICMP 2-IGMP 6-TCP 17-UDP 89-OSPF，我们用0x20承载我们自己的Ehternet In IP协议，就叫做Virtual Ethernet Protocol，VEP吧)
+[2] Header checksum: IP报头自己的校验和，先假设校验和为0，然后调用checkSum算法计算即可**************************************************
+[4] Source IP(源IP)**********************
+[4] Destination IP(目的IP)**********************
+
+ARP报头填写方式
+[2] Hardware type: 0x0001(Ethernet)
+[2] Protocol type: 0x0800(IP)
+[1] Hardware size: 0x06
+[1] Protocol size: 0x04
+[2] Opcode: 0x0001(request) 或者 0x0002(reply)
+[6] Source MAC: 0xXXXXXXXXXXXX(6个字节)
+[4] Source IP: 0xXXXXXXXX(4个字节)
+[6] Target MAC: 0xXXXXXXXXXXXX(6个字节，查询时空着为0，而外面Ehternet的Target MAC全F，应答时Source Target颠倒，并且全填好）
+[4] Target IP: 0xXXXXXXXX(4个字节)
